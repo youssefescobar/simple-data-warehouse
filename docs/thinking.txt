@@ -1,0 +1,23 @@
+A simple ELT Data pipeline that populates a datewarehouse.
+
+Phase 1: Data source
+
+Since i want it to be as realistic as possible ill design a OLTP db on postgres and then extract from it to simulate a working production db.
+
+1. Inits: i have to get a docker container running postgres up to start designing and seeding.
+so ill start with simple docker compose file and only make 1 service which is the docker container.
+
+its done, to connect 
+docker exec -it production_db psql -U admin -d xyz_store
+
+1.2 design prod db: 
+https://dbdiagram.io/
+ 
+as realistic as possible, makes u write near DMBL to create tables and visualize them. so i can eidt and paste into psql on the spot.
+
+the main idea of the "prod db" is i want it to be realistic so ill follow an OLTP design and make it 3nf
+
+desgin done. now running the schema.sql file using 
+docker exec -i production_db psql -U admin -d xyz_store < schema.sql
+
+maked a seeder file and seeded the db

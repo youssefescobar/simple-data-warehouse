@@ -1,0 +1,17 @@
+
+name: Simple Data warehouse
+services:
+  production_postgres:
+    image: postgres:16
+    container_name: production_db
+    restart: always
+
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: xyz_store
+    
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./prod_db:/var/lib/postgresql/data"
