@@ -30,7 +30,21 @@ now that the prod is seeded and we have a semi realistic db to extract data from
 i added a script that automates the initalization and seeding of both dbs upon requst since its alot of work to just stop container, delete file, up container, apply schema, seed , confirm.
 
 
-Phase 2: ELT pipeline.
+Phase 2: Warehouse set up
+
+first ill add to the docker compose file another postgres service to simulate a datawarehouse. 
+
+ill use the Medallion architecture
+
+Bronze: Raw extracts
+Silver: Cleaned/joined
+Gold: Business metrics
+
+ok the wh is up. 
+
+
+
+Phase 3: ELT pipeline.
 
 i have alot of options do pick and choose from like the extraction strategy, will it be incremental or a full refresh.
 will i load it in batches or all at once. 
@@ -43,13 +57,5 @@ after a quick research ill go with an incremental, full copy paste structure sin
 
 
 
-Phase 3: Warehouse set up
 
-first ill add to the docker compose file another postgres service to simulate a datawarehouse. 
-
-ill use the Medallion architecture
-
-Bronze: Raw extracts
-Silver: Cleaned/joined
-Gold: Business metrics
 

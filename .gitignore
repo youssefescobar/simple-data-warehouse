@@ -9,3 +9,4 @@ wheels/
 # Virtual environments
 .venv
 prod_db
+wh_db

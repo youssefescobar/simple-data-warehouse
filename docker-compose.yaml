@@ -16,17 +16,17 @@ services:
     volumes:
       - "./prod_db:/var/lib/postgresql/data"
 
-  # datawarehouse_postgres:
-  #   image: postgres:16
-  #   container_name: warehouse
-  #   restart: always
+  datawarehouse_postgres:
+    image: postgres:16
+    container_name: dwh
+    restart: always
 
-  #   environment:
-  #     POSTGRES_USER: admin
-  #     POSTGRES_PASSWORD: admin
-  #     POSTGRES_DB: xyz_store_wh
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: xyz_store_wh
     
-  #   ports:
-  #     - "5433:5433"
-  #   volumes:
-  #     - "./prod_db:/var/lib/postgresql/data"
+    ports:
+      - "5433:5432"
+    volumes:
+      - "./wh_db:/var/lib/postgresql/data"
