@@ -41,6 +41,9 @@ Silver: Cleaned/joined
 Gold: Business metrics
 
 ok the wh is up. 
+creeted the 3 schemas 
+
+i manually wrote the bronze schema since its just 4 tables. 
 
 
 
@@ -49,7 +52,17 @@ Phase 3: ELT pipeline.
 i have alot of options do pick and choose from like the extraction strategy, will it be incremental or a full refresh.
 will i load it in batches or all at once. 
 
-after a quick research ill go with an incremental, full copy paste structure since the db isnt that big. 
+after a quick research ill go with an incremental, high water mark load. to simulate working enviroments
+
+incremental: only new stuff
+high water mark: using the created at and updated at to tell to be able to tell new rows from old ones
+
+extract and load script is done
+
+
+
+
+
 
 
 
