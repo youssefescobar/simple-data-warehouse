@@ -17,7 +17,39 @@ as realistic as possible, makes u write near DMBL to create tables and visualize
 
 the main idea of the "prod db" is i want it to be realistic so ill follow an OLTP design and make it 3nf
 
+i made 2 different dbs, 1 with 12 tables that is kinda realistc, and another with for for ease of use, since this is a side project. 
+ill try my best with the realsitc one else ill just swap for the simpler if stuff got out of hand.
+
 desgin done. now running the schema.sql file using 
 docker exec -i production_db psql -U admin -d xyz_store < schema.sql
 
-maked a seeder file and seeded the db
+made a seeder file and seeded the db
+
+now that the prod is seeded and we have a semi realistic db to extract data from this marks the end of phase 1 
+
+i added a script that automates the initalization and seeding of both dbs upon requst since its alot of work to just stop container, delete file, up container, apply schema, seed , confirm.
+
+
+Phase 2: ELT pipeline.
+
+i have alot of options do pick and choose from like the extraction strategy, will it be incremental or a full refresh.
+will i load it in batches or all at once. 
+
+after a quick research ill go with an incremental, full copy paste structure since the db isnt that big. 
+
+
+
+
+
+
+
+Phase 3: Warehouse set up
+
+first ill add to the docker compose file another postgres service to simulate a datawarehouse. 
+
+ill use the Medallion architecture
+
+Bronze: Raw extracts
+Silver: Cleaned/joined
+Gold: Business metrics
+
