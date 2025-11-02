@@ -3,7 +3,6 @@ import pandas as pd
 from io import StringIO
 from datetime import datetime
 
-# --- Database Configurations ---
 
 def get_db_connection(config):
     """Establishes a connection to the database."""
@@ -16,30 +15,16 @@ def get_db_connection(config):
     )
 
 def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key):
-    """
-    Extracts new/updated data from a prod table and "UPSERTS" it 
-    into a bronze layer table.
-    
-    This function expects wh_conn to be managed (opened, closed, committed)
-    by the caller.
-    
-    :param prod_conn: An active psycopg2 connection to the production DB.
-    :param wh_conn: An active psycopg2 connection to the warehouse DB.
-    :param prod_table_name: The source table name in 'public' schema (e.g., 'customers').
-    :param wh_table_name: The destination table name in 'bronze' schema (e.g., 'raw_customers').
-    :param primary_key: The primary key column of the table (e.g., 'customer_id').
-    """
+
     print(f"\n--- Starting incremental load for: public.{prod_table_name} -> bronze.{wh_table_name} ---")
     
     wh_cursor = None
     try:
         wh_cursor = wh_conn.cursor()
         
-        # 1. GET HIGH WATERMARK from Warehouse (Bronze)
         wh_cursor.execute(f"SELECT MAX(updated_at) FROM bronze.{wh_table_name};")
         high_watermark = wh_cursor.fetchone()[0]
 
-        # 2. EXTRACT data from Production
         if high_watermark:
             print(f"- High watermark found: {high_watermark}")
             sql_query = f"SELECT * FROM public.{prod_table_name} WHERE updated_at > %s;"
@@ -56,7 +41,6 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
         print(f"- Extracted {len(df)} new/updated rows from production.")
         
         # 3. TRANSFORM (Add metadata columns)
-        # (This assumes your bronze tables have these columns!)
         df['_extracted_at'] = datetime.now()
         df['_source_system'] = 'xyz_store_oltp'
 
@@ -121,11 +105,7 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
             wh_cursor.close()
 
 def main():
-    """
-    Main function to orchestrate the EL pipeline.
-    Manages connections and loops through tables.
-    """
-    
+
     prod_db_config = {
         "host": 'localhost',
         "port": 5432,

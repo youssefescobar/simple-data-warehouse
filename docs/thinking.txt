@@ -47,7 +47,7 @@ i manually wrote the bronze schema since its just 4 tables.
 
 
 
-Phase 3: ELT pipeline.
+Phase 3: EL set up.
 
 i have alot of options do pick and choose from like the extraction strategy, will it be incremental or a full refresh.
 will i load it in batches or all at once. 
@@ -58,6 +58,24 @@ incremental: only new stuff
 high water mark: using the created at and updated at to tell to be able to tell new rows from old ones
 
 extract and load script is done
+
+what was done is
+1. GET HIGH WATERMARK from Warehouse (Bronze)
+2. checking if their is something new, if no stop.
+3. if yes select it all
+4. create a staging table
+5. bulk load the df into staging table
+6. insert into bronze
+7. drop staging
+
+Phase 4: transform
+
+installed dbt-postgres
+
+connected it to the xyz_store_wh silver schema
+
+ran dbt debug to confirm 
+
 
 
 
