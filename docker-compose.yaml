@@ -30,3 +30,11 @@ services:
       - "5433:5432"
     volumes:
       - "./wh_db:/var/lib/postgresql/data"
+
+  # airflow:
+  #   container_name: airflow_orchestrator
+  #   image: apache/airflow:3.1.0
+  #   ports:
+  #     - 8000:8080
+  #   environment:
+  #   AIRFLOW__DATABASE__SQL__ALCHEMY_CONN:

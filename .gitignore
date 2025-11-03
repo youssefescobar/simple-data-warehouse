@@ -12,3 +12,4 @@ prod_db
 wh_db
 scripts/dw/logs
 scripts/dw/xyz_store_analytics
+logs
