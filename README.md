@@ -1,177 +1,155 @@
+```markdown
+# Simple Data Warehouse
+
+A **complete, end-to-end ELT pipeline** showcasing real-world data engineering practices using modern open-source tools.
 
 ---
 
-#  Simple Data Warehouse
-
-This project is a **simple, end-to-end ELT pipeline** that demonstrates how to:
-
-* **Extract** data from a production (OLTP) database
-* **Load** it into a PostgreSQL data warehouse (OLAP)
-* **Transform** it into analytics-ready tables using dbt
-* **Orchestrate** everything using Apache Airflow
-
----
-
-##  System Design
+## System Design
 
 ![Production Design](docs/prod_design_simple.png)
 
 ---
 
-##  Technologies Used
+## Technologies Used
 
-* **Docker & Docker Compose** — containerize and orchestrate services
-* **PostgreSQL** — used for both the OLTP (production) and OLAP (warehouse) layers
-* **Python** — handles the Extract & Load (EL) phase
-
-  * `psycopg2-binary` for PostgreSQL connections
-  * `pandas` for data manipulation
-* **dbt (Data Build Tool)** — manages data transformations (T)
-* **Apache Airflow** — orchestrates the entire ELT pipeline
+| Tool                | Purpose                                    |
+|---------------------|--------------------------------------------|
+| **Docker & Docker Compose** | Containerize and orchestrate services     |
+| **PostgreSQL**      | OL resinsTP (production) & OLAP (warehouse) |
+| **Python**          | Extract & Load (EL) phase                  |
+| `psycopg2-binary`   | PostgreSQL connectivity                    |
+| `pandas`            | Data manipulation                          |
+| **dbt**             | Data transformations (T)                   |
+| **Apache Airflow**  | Pipeline orchestration                     |
 
 ---
 
-##  Project Structure
+## Project Structure
 
-```
+```bash
 .
 ├── airflow/
 │   ├── dags/
-│   │   └── orchestrator.py           # Airflow DAG for pipeline orchestration
-│   └── Dockerfile                    # (Optional) custom Dockerfile for Airflow
+│   │   └── orchestrator.py           # Airflow DAG
+│   └── Dockerfile                    # Custom Airflow image (optional)
 │
 ├── docs/
-│   ├── prod_design_simple.png        # Simplified production DB schema diagram
-│   └── thinking.txt                  # Notes on design decisions
+│   ├── prod_design_simple.png        # OLTP schema diagram
+│   └── thinking.txt                  # Design notes
 │
 ├── scripts/
 │   ├── prod/
-│   │   ├── schema_simple.sql         # Defines the production (OLTP) schema
-│   │   └── seed_simple.py            # Seeds production DB with sample data
+│   │   ├── schema_simple.sql         # OLTP schema
+│   │   └── seed_simple.py            # Seed production data
 │   └── dw/
-│       ├── el.py                     # Extract & Load script (Python)
-│       ├── init_wh_simple.sql        # Initializes data warehouse schemas
-│       └── xyz_store_analytics/      # dbt project for transformations
+│       ├── el.py                     # Extract & Load script
+│       ├── init_wh_simple.sql        # Initialize warehouse
+│       └── xyz_store_analytics/      # dbt project
 │
-├── docker-compose.yaml               # Defines all services (DBs + Airflow)
+├── docker-compose.yaml               # All services definition
 └── pyproject.toml                    # Python dependencies
 ```
 
 ---
 
-##  Getting Started
+## Getting Started
 
-### 1️ Prerequisites
+### Prerequisites
 
-Make sure you have:
-
-* Docker
-* Docker Compose
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ---
 
-### 2️ Setup and Run
-
-**Step 1: Clone the repository**
+### Setup & Run
 
 ```bash
-git clone <repository-url>
+# 1. Clone the repo
+git clone <your-repo-url>
 cd simple-datawarehouse
-```
 
-**Step 2: Build and start all services**
-
-```bash
+# 2. Start all services
 docker-compose up --build
 ```
 
-This command starts:
-
-* `production_db` — OLTP source database
-* `dwh` — OLAP data warehouse
-* `airflow_orchestrator` — Airflow for orchestration
+This launches:
+- `production_db` → OLTP source
+- `dwh` → Data warehouse
+- `airflow_orchestrator` → Airflow instance
 
 ---
 
-### 3️ Seed the Production Database
-
-Once containers are running, initialize and seed the production database:
+### Seed Production Data
 
 ```bash
+# Apply schema
 docker exec -it production_db psql -U admin -d xyz_store < scripts/prod/schema_simple.sql
+
+# Seed sample data
 python scripts/prod/seed_simple.py
 ```
 
 ---
 
-##  Pipeline Overview
+## ELT Pipeline Overview
 
-This project implements an **ELT** pipeline:
-
-1. **Extract & Load (EL)** — `scripts/dw/el.py`
-
-   * Connects to the production DB
-   * Extracts new or updated records (incrementally using high-watermark logic)
-   * Loads them into the **bronze** layer of the data warehouse
-
-2. **Transform (T)** — dbt
-
-   * Transforms data from `bronze` → `silver` → `gold`
-   * Creates cleaned, conformed, and aggregated tables
-
-![Pipeline Graph](docs/wh-elt-pipeline-graph%20\(2\).png)
-
----
-
-##  Data Modeling
-
-The data warehouse follows the **Medallion Architecture**:
-
-| Layer      | Purpose                                        | Example Tables                                            |
-| ---------- | ---------------------------------------------- | --------------------------------------------------------- |
-| **Bronze** | Raw, uncleaned data from the source system     | `raw_orders`, `raw_customers`                             |
-| **Silver** | Cleaned and conformed data                     | `clean_orders`, `clean_customers`                         |
-| **Gold**   | Aggregated, analytics-ready data (Star Schema) | `fact_sales`, `dim_customers`, `dim_products`, `dim_date` |
-
----
-
-##  Orchestration (Airflow)
-
-The entire pipeline is managed by **Apache Airflow**, via the DAG defined in:
-
-```
-airflow/dags/orchestrator.py
+```mermaid
+graph TD
+    A[Production DB] -->|Extract| B[el.py]
+    B -->|Load| C[Bronze Layer]
+    C -->|dbt transform| D[Silver Layer]
+    D -->|dbt transform| E[Gold Layer]
+    E --> F[Analytics / BI Tools]
 ```
 
-### DAG Tasks:
+---
 
-1. **`extract_and_load_bronze`** — runs `el.py` to perform extraction and loading
-2. **`dbt_run_models`** — executes dbt transformations
-3. **`dbt_test_models`** — runs dbt tests for data quality
-4. **`dbt_return_sample`** — (optional) returns a preview of transformed data
+## Data Modeling (Medallion Architecture)
 
-Access the Airflow UI at:
-👉 **[http://localhost:8000](http://localhost:8000)**
+| Layer   | Purpose                              | Example Tables                     |
+|---------|--------------------------------------|------------------------------------|
+| Bronze  | Raw, unprocessed data                | `raw_orders`, `raw_customers`      |
+| Silver  | Cleaned, validated, conformed        | `clean_orders`, `clean_customers`  |
+| Gold    | Aggregated, business-ready (Star Schema) | `fact_sales`, `dim_*`           |
 
 ---
 
-##  Future Enhancements
+## Orchestration with Airflow
 
-* Add advanced dbt transformations and business metrics
-* Implement data quality checks and tests in dbt
-* Add detailed logging and monitoring for EL and T processes
-* Automate scheduling via Airflow
+DAG: `airflow/dags/orchestrator.py`
 
----
+### Tasks:
+1. `extract_and_load_bronze` → Runs `el.py`
+2. `dbt_run_models` → Executes all dbt models
+3. `dbt_test_models` → Runs data quality tests
+4. `dbt_return_sample` → Optional preview
 
-##  Summary
-
-| Stage              | Tool                          | Purpose                              |
-| ------------------ | ----------------------------- | ------------------------------------ |
-| **Extract & Load** | Python (`psycopg2`, `pandas`) | Pull data from OLTP and load into DW |
-| **Transform**      | dbt                           | Clean, model, and aggregate          |
-| **Orchestrate**    | Airflow                       | Automate the full ELT process        |
-| **Store**          | PostgreSQL                    | Persist both OLTP and OLAP data      |
+**Airflow UI**: [http://localhost:8000](http://localhost:8000)  
+*(Default login: `airflow` / `airflow`)*
 
 ---
 
+## Future Enhancements
+
+- [ ] Add incremental models in dbt
+- [ ] Implement snapshotting for slowly changing dimensions
+- [ ] Integrate data quality monitoring (Great Expectations)
+- [ ] Add email/Slack alerts on failure
+- [ ] Schedule daily runs via Airflow cron
+
+---
+
+## Summary
+
+| Stage           | Tool                        | Responsibility                     |
+|-----------------|-----------------------------|-------------------------------------|
+| Extract & Load  | Python + `psycopg2` + `pandas` | Pull & stage raw data              |
+| Transform       | **dbt**                     | Clean → Model → Aggregate           |
+| Orchestrate     | **Apache Airflow**          | Schedule & monitor full pipeline    |
+| Store           | **PostgreSQL**              | OLTP + OLAP persistence             |
+
+---
+
+**Ready for analytics. Built to scale.**
+```
