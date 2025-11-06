@@ -68,6 +68,8 @@ what was done is
 6. insert into bronze
 7. drop staging
 
+
+
 Phase 4: transform
 
 installed dbt-postgres
@@ -77,7 +79,14 @@ connected it to the xyz_store_wh silver schema
 ran dbt debug to confirm 
 
 
+made a sources.yml to ref the already made bronze layer
 
+made a silver layer with minimal cleaning, could be done better and ill find out later
+
+made a gold layer consisting of a star schema fact, dims tables. 
+
+
+Phase 5: orchestraction
 
 
 
