@@ -88,6 +88,15 @@ made a gold layer consisting of a star schema fact, dims tables.
 
 Phase 5: orchestraction
 
+added airflow standalone to the compose file
+made a custom image since no dbt pandas or a psycopg is installed
+made a db for airflow inside the wh for its metadata
+mounted /airflow
+mounted /scripts/dw for the el.py script. so i can load in to the bronze.
+
+
+
+
 
 
 

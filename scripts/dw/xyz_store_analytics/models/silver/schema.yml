@@ -1,0 +1,94 @@
+# version: 2
+
+# models:
+#   - name: stg_customers 
+#     description: "Staging model for customer data."
+#     columns:
+#       - name: customer_id
+#         description: "The unique identifier for a customer."
+#         tests:
+#           - unique
+#           - not_null
+
+#       - name: email
+#         description: "The customer's email address."
+#         tests:
+#           - not_null
+
+#   - name: stg_orders
+#     description: "Staging model for order data."
+#     columns:
+#       - name: order_id
+#         description: "The unique identifier for an order."
+#         tests:
+#           - unique
+#           - not_null
+      
+#       - name: customer_id
+#         description: "Foreign key to stg_customers."
+#         tests:
+#           - not_null
+#           - relationships:  # Checks if every customer_id in orders
+#               to: ref('stg_customers') # exists in this model
+#               field: customer_id      # in this column
+
+#       - name: status
+#         description: "The status of the order."
+#         tests:
+#           - accepted_values:
+#               values: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']
+
+#   - name: stg_products
+#     description: "staging products table"
+#     columns:
+#       - name: product_id
+#         description: "The unique identifier for a product."
+#         tests:
+#         - unique
+#         - not_null
+
+#       - name: name
+#         description: "product name"
+#         tests:
+#         - not_null
+
+#       - name: category
+#         description: "product category"
+#         tests:
+#         - not_null
+
+#       - name: price
+#         description: "Items price"
+#         tests:
+#         - not_null
+      
+#   - name: stg_order_items
+#     description: "items in each order"
+#     columns:
+
+#       - name: order_item_id
+#         tests:
+#           - unique
+#           - not_null
+
+#       - name: order_id
+#         tests:
+#           - not_null
+#           - relationships:
+#               to: ref('stg_orders')
+#               field: order_id
+
+#       - name: product_id
+#         tests:
+#           - not_null
+#           - relationships:
+#               to: ref('stg_products')
+#               field: product_id
+#       - name: quantity
+#         tests:
+#           - not_null
+#       - name: unit_price
+#         tests:
+#           - not_null
+      
+
