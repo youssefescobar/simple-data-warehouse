@@ -1,0 +1,12 @@
+xyz_store_analytics:
+  outputs:
+    dev:
+      dbname: xyz_store_wh
+      host: datawarehouse_postgres
+      pass: admin
+      port: 5432
+      schema: silver
+      threads: 4
+      type: postgres
+      user: admin
+  target: dev

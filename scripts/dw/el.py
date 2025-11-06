@@ -2,7 +2,7 @@ import psycopg2
 import pandas as pd
 from io import StringIO
 from datetime import datetime
-
+import sys  # <-- Add this import
 
 def get_db_connection(config):
     """Establishes a connection to the database."""
@@ -53,8 +53,6 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
 
         # B. Bulk-load DataFrame into the temp table
         output = StringIO()
-        # This mapping is position-based. It's safe as long as `SELECT *` 
-        # column order matches the `bronze` table order (plus new metadata cols)
         df.to_csv(output, sep='\t', header=False, index=False, na_rep='NULL')
         output.seek(0)
         
@@ -62,7 +60,6 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
         print(f"- Loaded {len(df)} rows into temporary staging table.")
 
         # C. Perform the "UPSERT" using INSERT...ON CONFLICT
-        # Get all columns from the destination bronze table
         wh_cursor.execute(f"""
             SELECT array_agg(column_name::text)
             FROM information_schema.columns
@@ -70,11 +67,7 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
         """)
         all_columns = wh_cursor.fetchone()[0]
         
-        # Create the 'SET' clause for the update
-        # e.g., "SET col1 = EXCLUDED.col1, col2 = EXCLUDED.col2, ..."
         update_set_clause = ", ".join([f'"{col}" = EXCLUDED."{col}"' for col in all_columns if col != primary_key])
-        
-        # Create the column list for insert
         column_list = ", ".join([f'"{col}"' for col in all_columns])
 
         upsert_sql = f"""
@@ -107,22 +100,25 @@ def extract_load(prod_conn, wh_conn, prod_table_name, wh_table_name, primary_key
 def main():
 
     prod_db_config = {
-        "host": 'localhost',
-        "port": 5432,
+        # Use the service name from docker-compose.yml
+        "host": 'production_postgres',
+        # The internal port inside the Docker network
+        "port": 5432, 
         "user": 'admin',
         "password": 'admin',
         "dbname" : 'xyz_store'
     }
 
     wh_db_config = {
-        "host": 'localhost',
-        "port": 5433,
+        # Use the service name from docker-compose.yml
+        "host": 'datawarehouse_postgres',
+        # The internal port inside the Docker network (not 5433)
+        "port": 5432, 
         "user": 'admin',
         "password": 'admin',
         "dbname" : 'xyz_store_wh'
     }
     
-    # Define all table mappings in one place
     table_mappings = [
         {"prod": "customers",   "wh": "raw_customers",   "pk": "customer_id"},
         {"prod": "products",    "wh": "raw_products",    "pk": "product_id"},
@@ -134,13 +130,11 @@ def main():
     wh_conn = None
     
     try:
-        # Create connections *once*
         prod_conn = get_db_connection(prod_db_config)
         wh_conn = get_db_connection(wh_db_config)
         
         print("--- Connections established ---")
         
-        # Loop through table mappings
         for mapping in table_mappings:
             extract_load(
                 prod_conn=prod_conn,
@@ -153,11 +147,11 @@ def main():
         print("\nAll tables loaded successfully!")
         
     except Exception as e:
-        # The error is already printed by extract_load
         print(f"\nPipeline failed: {str(e)}")
+        # <-- Add this to tell Airflow the task failed!
+        sys.exit(1) 
         
     finally:
-        # Close connections *once*
         if prod_conn:
             prod_conn.close()
         if wh_conn:
@@ -166,4 +160,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-

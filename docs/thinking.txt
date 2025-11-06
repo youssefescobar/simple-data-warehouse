@@ -94,7 +94,15 @@ made a db for airflow inside the wh for its metadata
 mounted /airflow
 mounted /scripts/dw for the el.py script. so i can load in to the bronze.
 
+since the el script will run inside docker it will needed fixes, the connect part to be exact. 
 
+fixed by making a network of 3 container and referining to them via container name not local host.
+
+el.py file runs correctly. 
+
+dbt runs, test, sample working. 
+
+ez.
 
 
 
